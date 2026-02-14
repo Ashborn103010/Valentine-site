@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WILL YOU BE MY VALENTINE "NAME"?</title>
+
+<style>
+:root{
+  --txt: rgba(255,255,255,.94);
+  --glass: rgba(0,0,0,.25);
+  --glass2: rgba(0,0,0,.38);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+  color: var(--txt);
+  overflow:hidden;
+  background:
+    radial-gradient(1200px 600px at 20% 15%, rgba(255,140,235,.45), transparent 60%),
+    radial-gradient(900px 500px at 80% 20%, rgba(160,120,255,.45), transparent 60%),
+    radial-gradient(1100px 700px at 60% 85%, rgba(255,80,160,.35), transparent 60%),
+    linear-gradient(135deg, #2a0c3c, #160a2a 45%, #0e132a);
+}
+
+.wrap{
+  height:100%;
+  display:grid;
+  place-items:center;
+  padding:22px;
+}
+.content{
+  width:min(820px,94vw);
+  text-align:center;
+}
+h1{
+  font-size: clamp(28px,4.6vw,54px);
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  margin:0 0 10px;
+  text-shadow:
+    0 0 18px rgba(255,170,240,.45),
+    0 0 38px rgba(170,150,255,.35);
+}
+.sub{opacity:.85;margin-bottom:20px}
+
+.btnRow{
+  display:flex;
+  gap:14px;
+  justify-content:center;
+  flex-wrap:wrap;
+  position:relative;
+}
+button{
+  border:none;
+  padding:14px 24px;
+  font-size:18px;
+  border-radius:999px;
+  cursor:pointer;
+  transition:.15s;
+  box-shadow:0 14px 32px rgba(0,0,0,.28);
+}
+#yesBtn{background:linear-gradient(135deg,#ff78d2,#ffb4f0)}
+#noBtn{background:linear-gradient(135deg,#8caaff,#bec8ff)}
+button:hover{transform:translateY(-2px) scale(1.02)}
+
+.char{
+  position:fixed;
+  left:32%;
+  bottom:-520px;
+  transform:translateX(-50%);
+  width:min(520px,92vw);
+  height:520px;
+  z-index:4;
+  pointer-events:none;
+  transition:bottom .9s cubic-bezier(.2,.9,.1,1);
+}
+.char.show{bottom:-20px}
+.char img{
+  position:absolute;
+  left:50%;
+  bottom:0;
+  transform:translateX(-50%);
+  max-width:100%;
+  max-height:100%;
+  object-fit:contain;
+}
+
+.bubble{
+  position:absolute;
+  left:66%;
+  top:130px;
+  transform:translateX(-50%);
+  max-width:360px;
+  padding:12px 14px;
+  border-radius:18px;
+  background:var(--glass);
+  border:1px solid rgba(255,255,255,.18);
+  backdrop-filter:blur(10px);
+  font-size:16px;
+  opacity:0;
+  transition:.2s;
+}
+.bubble.show{opacity:1}
+
+.toast{
+  position:fixed;
+  left:50%;
+  transform:translateX(-50%);
+  bottom:20px;
+  padding:10px 14px;
+  border-radius:999px;
+  background:var(--glass2);
+  border:1px solid rgba(255,255,255,.18);
+  backdrop-filter:blur(10px);
+  opacity:0;
+  transition:.2s;
+}
+.toast.show{opacity:1}
+
+.crush{
+  animation:crush .55s forwards;
+}
+@keyframes crush{
+  0%{transform:scale(1)}
+  100%{transform:scale(0) rotate(-10deg);opacity:0}
+}
+</style>
+</head>
+
+<body>
+
+<div class="wrap">
+  <div class="content">
+    <h1>WILL YOU BE MY VALENTINE "HER NAME"?</h1>
+    <p class="sub">Choose wisely 😌</p>
+    <div class="btnRow">
+      <button id="yesBtn">YES 💖</button>
+      <button id="noBtn">NO 💔</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">Nice try 😌</div>
+
+<div class="char" id="char">
+  <div class="bubble" id="bubble"></div>
+  <img id="charImg" src="good.png">
+</div>
+
+<script>
+const yesBtn=document.getElementById("yesBtn");
+let noBtn=document.getElementById("noBtn");
+const char=document.getElementById("char");
+const bubble=document.getElementById("bubble");
+const toast=document.getElementById("toast");
+const charImg=document.getElementById("charImg");
+
+let accepted=false;
+
+function say(text){
+  bubble.textContent=text;
+  bubble.classList.add("show");
+  setTimeout(()=>bubble.classList.remove("show"),1500);
+}
+function showToast(text){
+  toast.textContent=text;
+  toast.classList.add("show");
+  setTimeout(()=>toast.classList.remove("show"),1500);
+}
+function showChar(src){
+  charImg.src=src;
+  char.classList.add("show");
+}
+function hideChar(){
+  if(!accepted) char.classList.remove("show");
+}
+
+/* ===== MOVE NO BUTTON ===== */
+function moveNoButton(){
+  if(accepted || !noBtn) return;
+
+  const pad = 12;
+  const r = document.querySelector(".btnRow").getBoundingClientRect();
+  const b = noBtn.getBoundingClientRect();
+
+  const minX = r.left + pad;
+  const maxX = r.right - pad - b.width;
+  const minY = r.top - 10;
+  const maxY = r.bottom + 120;
+
+  const x = Math.max(minX, Math.min(maxX, minX + Math.random() * (maxX - minX)));
+  const y = Math.max(minY, Math.min(maxY, minY + Math.random() * (maxY - minY)));
+
+  noBtn.style.position = "fixed";
+  noBtn.style.left = x + "px";
+  noBtn.style.top = y + "px";
+}
+
+/* ===== NO CLICK FLOW ===== */
+function onNo(){
+  if(accepted) return;
+
+  showChar("really.png");
+  say("Really? Huu~ 😏");
+
+  setTimeout(()=>{ if(!accepted) showToast("Nice try 😌"); },1200);
+  setTimeout(()=>{ if(!accepted) say("You don't have a choice 😌"); },2200);
+
+  moveNoButton();
+
+  setTimeout(()=>{ hideChar(); },4200);
+}
+
+noBtn.addEventListener("mouseenter", moveNoButton);
+noBtn.addEventListener("mousemove", moveNoButton);
+noBtn.addEventListener("touchstart", (e)=>{ e.preventDefault(); moveNoButton(); }, {passive:false});
+noBtn.addEventListener("click",e=>{
+  e.preventDefault();
+  onNo();
+});
+
+/* ===== YES CLICK FLOW ===== */
+yesBtn.addEventListener("click",async e=>{
+  e.preventDefault();
+
+  if(!accepted){
+    accepted=true;
+    showChar("good.png");
+    say("Good girl. 😏");
+
+    await new Promise(r=>setTimeout(r,1000));
+
+    if(noBtn){
+      noBtn.classList.add("crush");
+      await new Promise(r=>setTimeout(r,600));
+      noBtn.remove();
+      noBtn=null;
+    }
+  }
+});
+</script>
+
+</body>
+</html>

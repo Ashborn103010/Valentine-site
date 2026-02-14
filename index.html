@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>WILL YOU BE MY VALENTINE "NAME"?</title>
+<title>WILL YOU BE MY VALENTINE KITTY?</title>
 
 <style>
 :root{
@@ -25,11 +25,60 @@ body{
     linear-gradient(135deg, #2a0c3c, #160a2a 45%, #0e132a);
 }
 
+/* ===== V8 BACKGROUND: HEARTS + PARTICLES ===== */
+.hearts, .particles{ position:fixed; inset:0; pointer-events:none; z-index:1; }
+
+.heart{
+  position:absolute;
+  width:16px; height:16px;
+  transform: rotate(45deg);
+  opacity:.7;
+  filter: drop-shadow(0 6px 12px rgba(0,0,0,.25));
+  animation: floatUp linear infinite;
+}
+.heart:before,.heart:after{
+  content:"";
+  position:absolute;
+  width:16px; height:16px;
+  border-radius:50%;
+  background: rgba(255,255,255,.22);
+  backdrop-filter: blur(2px);
+}
+.heart:before{ left:-8px; top:0; }
+.heart:after{ left:0; top:-8px; }
+.heart .core{
+  position:absolute; inset:0;
+  background: rgba(255,120,210,.45);
+  border-radius:2px;
+}
+
+@keyframes floatUp{
+  from{ transform: translate3d(0, 20vh, 0) rotate(45deg) scale(.8); }
+  to  { transform: translate3d(0,-120vh,0) rotate(45deg) scale(1.35); }
+}
+
+.spark{
+  position:absolute;
+  width:3px; height:3px;
+  border-radius:50%;
+  background: rgba(255,255,255,.7);
+  box-shadow: 0 0 14px rgba(255,255,255,.55);
+  animation: twinkle 2.8s ease-in-out infinite;
+  opacity:.65;
+}
+@keyframes twinkle{
+  0%,100%{ transform:scale(.6); opacity:.35; }
+  50%{ transform:scale(1.4); opacity:.9; }
+}
+
+/* ===== CONTENT ===== */
 .wrap{
   height:100%;
   display:grid;
   place-items:center;
   padding:22px;
+  position:relative;
+  z-index:2;
 }
 .content{
   width:min(820px,94vw);
@@ -46,6 +95,7 @@ h1{
 }
 .sub{opacity:.85;margin-bottom:20px}
 
+/* ===== BUTTONS ===== */
 .btnRow{
   display:flex;
   gap:14px;
@@ -61,11 +111,13 @@ button{
   cursor:pointer;
   transition:.15s;
   box-shadow:0 14px 32px rgba(0,0,0,.28);
+  -webkit-tap-highlight-color: transparent;
 }
 #yesBtn{background:linear-gradient(135deg,#ff78d2,#ffb4f0)}
 #noBtn{background:linear-gradient(135deg,#8caaff,#bec8ff)}
 button:hover{transform:translateY(-2px) scale(1.02)}
 
+/* ===== CHARACTER ===== */
 .char{
   position:fixed;
   left:32%;
@@ -88,6 +140,7 @@ button:hover{transform:translateY(-2px) scale(1.02)}
   object-fit:contain;
 }
 
+/* ===== SPEECH ===== */
 .bubble{
   position:absolute;
   left:66%;
@@ -105,6 +158,7 @@ button:hover{transform:translateY(-2px) scale(1.02)}
 }
 .bubble.show{opacity:1}
 
+/* ===== TOAST ===== */
 .toast{
   position:fixed;
   left:50%;
@@ -117,24 +171,60 @@ button:hover{transform:translateY(-2px) scale(1.02)}
   backdrop-filter:blur(10px);
   opacity:0;
   transition:.2s;
+  z-index:5;
 }
 .toast.show{opacity:1}
 
-.crush{
-  animation:crush .55s forwards;
-}
+/* ===== CRUSH ===== */
+.crush{ animation:crush .55s forwards; }
 @keyframes crush{
   0%{transform:scale(1)}
   100%{transform:scale(0) rotate(-10deg);opacity:0}
+}
+
+/* ===== HEART POP BURST (ONLY EXTRA EFFECT) ===== */
+.burst{
+  position:fixed;
+  left:50%;
+  top:40%;
+  transform:translate(-50%,-50%);
+  width:10px; height:10px;
+  pointer-events:none;
+  z-index:3;
+}
+.burst i{
+  position:absolute;
+  left:0; top:0;
+  width:12px; height:12px;
+  transform: rotate(45deg);
+  opacity:0;
+  animation: pop .95s ease-out forwards;
+}
+.burst i:before,.burst i:after{
+  content:"";
+  position:absolute;
+  width:12px; height:12px;
+  border-radius:50%;
+  background: rgba(255,180,240,.92);
+  box-shadow: 0 0 18px rgba(255,150,230,.55);
+}
+.burst i:before{ left:-6px; top:0; }
+.burst i:after{ left:0; top:-6px; }
+@keyframes pop{
+  0%{ transform: rotate(45deg) translate(0,0) scale(.6); opacity:1; }
+  100%{ transform: rotate(45deg) translate(var(--dx), var(--dy)) scale(1.35); opacity:0; }
 }
 </style>
 </head>
 
 <body>
 
+<div class="hearts" id="hearts"></div>
+<div class="particles" id="particles"></div>
+
 <div class="wrap">
   <div class="content">
-    <h1>WILL YOU BE MY VALENTINE "HER NAME"?</h1>
+    <h1>WILL YOU BE MY VALENTINE KITTY?</h1>
     <p class="sub">Choose wisely 😌</p>
     <div class="btnRow">
       <button id="yesBtn">YES 💖</button>
@@ -147,7 +237,7 @@ button:hover{transform:translateY(-2px) scale(1.02)}
 
 <div class="char" id="char">
   <div class="bubble" id="bubble"></div>
-  <img id="charImg" src="good.png">
+  <img id="charImg" src="good.png" />
 </div>
 
 <script>
@@ -157,18 +247,83 @@ const char=document.getElementById("char");
 const bubble=document.getElementById("bubble");
 const toast=document.getElementById("toast");
 const charImg=document.getElementById("charImg");
+const hearts=document.getElementById("hearts");
+const particles=document.getElementById("particles");
 
 let accepted=false;
 
+/* ===== background (same v8 style) ===== */
+function spawnHearts(n=30){
+  hearts.innerHTML = "";
+  for(let i=0;i<n;i++){
+    const h=document.createElement("div");
+    h.className="heart";
+    const core=document.createElement("div");
+    core.className="core";
+    h.appendChild(core);
+
+    const left=Math.random()*100;
+    const size=10 + Math.random()*18;
+    const dur=7 + Math.random()*10;
+    const delay=-Math.random()*dur;
+
+    h.style.left = left + "vw";
+    h.style.bottom = (-10 - Math.random()*40) + "vh";
+    h.style.width = size + "px";
+    h.style.height = size + "px";
+    h.style.animationDuration = dur + "s";
+    h.style.animationDelay = delay + "s";
+    h.style.opacity = (0.35 + Math.random()*0.55).toFixed(2);
+
+    hearts.appendChild(h);
+  }
+}
+function spawnSparks(n=72){
+  particles.innerHTML = "";
+  for(let i=0;i<n;i++){
+    const s=document.createElement("div");
+    s.className="spark";
+    s.style.left = (Math.random()*100) + "vw";
+    s.style.top  = (Math.random()*100) + "vh";
+    s.style.animationDelay = (Math.random()*2.8) + "s";
+    s.style.opacity = (0.25 + Math.random()*0.6).toFixed(2);
+    particles.appendChild(s);
+  }
+}
+spawnHearts(30);
+spawnSparks(72);
+
+/* ===== burst hearts when YES ===== */
+function heartBurst(){
+  const b=document.createElement("div");
+  b.className="burst";
+  document.body.appendChild(b);
+
+  const count=34;
+  for(let i=0;i<count;i++){
+    const p=document.createElement("i");
+    const ang=(Math.PI*2) * (i/count);
+    const dist=80 + Math.random()*140;
+    p.style.setProperty("--dx", (Math.cos(ang)*dist).toFixed(1) + "px");
+    p.style.setProperty("--dy", (Math.sin(ang)*dist).toFixed(1) + "px");
+    p.style.animationDelay = (Math.random()*0.06) + "s";
+    b.appendChild(p);
+  }
+  setTimeout(()=>b.remove(), 1000);
+}
+
+/* ===== helpers ===== */
 function say(text){
   bubble.textContent=text;
   bubble.classList.add("show");
-  setTimeout(()=>bubble.classList.remove("show"),1500);
+  clearTimeout(say._t);
+  say._t=setTimeout(()=>bubble.classList.remove("show"),1500);
 }
 function showToast(text){
   toast.textContent=text;
   toast.classList.add("show");
-  setTimeout(()=>toast.classList.remove("show"),1500);
+  clearTimeout(showToast._t);
+  showToast._t=setTimeout(()=>toast.classList.remove("show"),1500);
 }
 function showChar(src){
   charImg.src=src;
@@ -210,39 +365,34 @@ function onNo(){
   setTimeout(()=>{ if(!accepted) say("You don't have a choice 😌"); },2200);
 
   moveNoButton();
-
   setTimeout(()=>{ hideChar(); },4200);
 }
 
 noBtn.addEventListener("mouseenter", moveNoButton);
 noBtn.addEventListener("mousemove", moveNoButton);
 noBtn.addEventListener("touchstart", (e)=>{ e.preventDefault(); moveNoButton(); }, {passive:false});
-noBtn.addEventListener("click",e=>{
-  e.preventDefault();
-  onNo();
-});
+noBtn.addEventListener("click",(e)=>{ e.preventDefault(); onNo(); });
 
 /* ===== YES CLICK FLOW ===== */
-yesBtn.addEventListener("click",async e=>{
+yesBtn.addEventListener("click", async (e)=>{
   e.preventDefault();
+  if(accepted) return;
 
-  if(!accepted){
-    accepted=true;
-    showChar("good.png");
-    say("Good girl. 😏");
+  accepted=true;
+  showChar("good.png");
+  say("Good girl. 😏");
+  heartBurst(); // <-- MANY HEARTS POP HERE
 
-    await new Promise(r=>setTimeout(r,1000));
+  await new Promise(r=>setTimeout(r,1000));
 
-    if(noBtn){
-      noBtn.classList.add("crush");
-      await new Promise(r=>setTimeout(r,600));
-      noBtn.remove();
-      noBtn=null;
-    }
+  if(noBtn){
+    noBtn.classList.add("crush");
+    await new Promise(r=>setTimeout(r,600));
+    noBtn.remove();
+    noBtn=null;
   }
 });
 </script>
 
 </body>
 </html>
-
